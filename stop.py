@@ -1,4 +1,4 @@
-from config import REGION_NAME, ACCESS_KEY, SECRET_KEY, EC2_KEY_PAIR
+from private_config import REGION_NAME, ACCESS_KEY, SECRET_KEY, EC2_KEY_PAIR
 from botocore.exceptions import ClientError
 from botocore.config import Config
 import boto3

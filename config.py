@@ -1,4 +1,4 @@
-# à compléter selon l'utilisateur
+# à copier dans un fichier private_config.py et à remplir
 
 REGION_NAME = "eu-west-3"
 ACCESS_KEY = ""

@@ -1,4 +1,4 @@
-config.py
+private_config.py
 __pycache__
 .vscode
 *.pem
