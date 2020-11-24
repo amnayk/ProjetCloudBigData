@@ -1,7 +1,8 @@
 from create_instances import create_instances
+from create_security_group import create_security_group
+from create_keys import create_keys
 import sys
-from private_config import REGION_NAME, ACCESS_KEY, SECRET_KEY, EC2_KEY_PAIR
-from botocore.exceptions import ClientError
+from private_config import REGION_NAME, ACCESS_KEY, SECRET_KEY
 from botocore.config import Config
 import boto3
 from os import chdir, getcwd
@@ -39,12 +40,12 @@ def main():
 
     elif cmd == 'create_keys':
         print('Creation des clés')
-        create_keys(client, *args)
+        create_keys(client)
         return 0
 
     elif cmd == 'create_security_group':
         print('Creation du groupe de sécurité')
-        create_security_gorup(ec2, *args)
+        create_security_group(client)
         return 0
 
     else:
