@@ -1,4 +1,5 @@
 from create_instances import create_instances
+from create_keys import create_keys
 import sys
 from private_config import REGION_NAME, ACCESS_KEY, SECRET_KEY, EC2_KEY_PAIR
 from botocore.exceptions import ClientError
@@ -39,12 +40,7 @@ def main():
 
     elif cmd == 'create_keys':
         print('Creation des clés')
-        create_keys(client, *args)
-        return 0
-
-    elif cmd == 'create_security_group':
-        print('Creation du groupe de sécurité')
-        create_security_gorup(ec2, *args)
+        create_keys(client, EC2_KEY_PAIR)
         return 0
 
     else:
