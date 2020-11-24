@@ -23,3 +23,5 @@ ec2.create_instances(ImageId='ami-0d3f551818b21ed81',
                      MinCount=1,
                      MaxCount=1,
                      )
+
+# ssh -i cle.pem root@[IP]  `commande shell`

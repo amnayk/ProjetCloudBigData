@@ -14,3 +14,9 @@ client = boto3.client('ec2',
                       aws_access_key_id=ACCESS_KEY,
                       aws_secret_access_key=SECRET_KEY
                       )
+
+client.create_security_group(
+    Description='Security group for kubernetes deployment',
+    GroupName='SNchos',
+    VpcId='vpc-79c02b11'
+)

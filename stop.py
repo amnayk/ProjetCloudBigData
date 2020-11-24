@@ -24,7 +24,8 @@ ec2 = boto3.resource(
 )
 
 # Deleting SSH key pairs
-configured_keys = [key["KeyName"] for key in client.describe_key_pairs()["KeyPairs"]]
+configured_keys = [key["KeyName"]
+                   for key in client.describe_key_pairs()["KeyPairs"]]
 for keyName in configured_keys:
     print("Deleteing key : " + keyName)
     client.delete_key_pair(KeyName=keyName)
@@ -47,3 +48,13 @@ for status in response:
         + status["CurrentState"]["Name"]
     )
 print("Terminated " + str(len(response)) + " instances.\n")
+
+# Deleting security groups
+response = client.describe_security_groups()
+for grp in response["SecurityGroups"]:
+    if grp["GroupName"] != "default":
+        client.delete_security_group(
+            GroupId=grp["GroupId"],
+        )
+        print(grp["GroupName"] + " : " + grp["GroupId"])
+print("Deleted " + str(len(response) - 1) + " groups.\n")
