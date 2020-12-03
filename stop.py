@@ -1,8 +1,10 @@
+import time
 from private_config import REGION_NAME, ACCESS_KEY, SECRET_KEY, EC2_KEY_PAIR
 from botocore.exceptions import ClientError
 from botocore.config import Config
 import boto3
 from os import chdir, getcwd, remove
+from os.path import isfile
 
 chdir(getcwd())
 
@@ -33,28 +35,38 @@ for keyName in configured_keys:
 print("Deleted " + str(len(configured_keys)) + " keys.\n")
 
 # Removing instances
-response = ec2.instances.terminate()[0]["TerminatingInstances"]
-response = [
-    status
-    for status in response
-    if status["PreviousState"]["Name"] != status["CurrentState"]["Name"]
-]
-for status in response:
-    print(
-        status["InstanceId"]
-        + " : "
-        + status["PreviousState"]["Name"]
-        + " -> "
-        + status["CurrentState"]["Name"]
-    )
-print("Terminated " + str(len(response)) + " instances.\n")
+if client.describe_instances()["Reservations"] :
+    response = ec2.instances.terminate()[0]["TerminatingInstances"]
+    response = [
+        status
+        for status in response
+        if status["PreviousState"]["Name"] != status["CurrentState"]["Name"]
+    ]
+    for status in response:
+        print(
+            status["InstanceId"]
+            + " : "
+            + status["PreviousState"]["Name"]
+            + " -> "
+            + status["CurrentState"]["Name"]
+        )
+    print("Terminated " + str(len(response)) + " instances.\n")
 
 # Deleting security groups
-response = client.describe_security_groups()
-for grp in response["SecurityGroups"]:
-    if grp["GroupName"] != "default":
-        client.delete_security_group(
-            GroupId=grp["GroupId"],
-        )
-        print(grp["GroupName"] + " : " + grp["GroupId"])
-print("Deleted " + str(len(response) - 1) + " groups.\n")
+if client.describe_security_groups()['SecurityGroups'] :
+    # Pour permettre de close les instances on ajoute un sleep
+    # IL FAUDRAIT LE REMPLACER PAR ATTENDRE QUE LES INSTANCES LIEES AU GRP SOIT TERMINEES 
+    time.sleep(30)
+    response = client.describe_security_groups()
+    for grp in response["SecurityGroups"]:
+        if grp["GroupName"] != "default":
+            client.delete_security_group(
+                GroupId=grp["GroupId"],
+            )
+            print(grp["GroupName"] + " : " + grp["GroupId"])
+    print("Deleted " + str(len(response) - 1) + " groups.\n")
+
+# Remove ssh.log
+if isfile("ssh.log") :
+    remove("ssh.log")
+    print("Deleted file ssh.log")

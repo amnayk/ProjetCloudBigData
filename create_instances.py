@@ -1,12 +1,17 @@
-def create_instances(resource, count, ImageId='ami-0d3f551818b21ed81', InstanceType='t2.micro'):
-    id_instance = resource.create_instances(ImageId=ImageId,
+# This Python file uses the following encoding: utf-8
+from private_config import EC2_KEY_PAIR
+def create_instances(resource, security_group, keys, count, ImageId='ami-0d3f551818b21ed81', InstanceType='t2.micro'):
+    instances = resource.create_instances(ImageId=ImageId,
                                          InstanceType=InstanceType,
-                                         MinCount=int(count),
+                                         KeyName=keys["KeyName"],
                                          MaxCount=int(count),
+                                         MinCount=int(count),
+                                         NetworkInterfaces=[{'AssociatePublicIpAddress' : True, 'DeviceIndex' : 0}]
                                          )
-    print(id_instance)
-    
-    ip_instance = resource.Instance(id_instance).public_ip_address
+                                         
+    for instance in instances: 
+        resource.Instance(instance.id).modify_attribute(
+            Groups=[security_group["GroupId"]]
+        )
 
-    print(ip_instance)
-# ssh -i cle.pem root@[IP]  `commande shell`
+    return 0
