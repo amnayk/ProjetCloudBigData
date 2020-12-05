@@ -41,68 +41,30 @@ def parse_arguments():
     return args
 
 
-def create_security_group(ec2, name, description):
+def create_security_group(ec2, ec2_resource, name, description):
     response = ec2.describe_vpcs()
     vpc_id = response.get("Vpcs", [{}])[0].get("VpcId", "")
     try:
-        response = ec2.create_security_group(
+        security_group = ec2.create_security_group(
             GroupName=name, Description=description, VpcId=vpc_id
         )
 
-        security_group_id = response["GroupId"]
+        security_group_id = security_group["GroupId"]
         print("Security Group Created %s in vpc %s (%s)." % (security_group_id, vpc_id, name))
-        response = ec2.authorize_security_group_ingress(
-                GroupId=security_group_id,
-                IpPermissions=[
-                    {
-                        "IpProtocol": "-1",
-                        "FromPort": 0,
-                        "ToPort": 65535,
-                        "IpRanges": [
-                            {
-                                "CidrIp": "0.0.0.0/0",
-                            },
-                        ],
-                        "Ipv6Ranges": [
-                            {
-                                "CidrIpv6": "::/0",
-                            },
-                        ],
-                    },
-                ],
-            )
-            # autoriser que les requêtes ssh
+        
+        # Autoriser uniquement les requêtes ssh
+        ec2_resource.SecurityGroup(security_group_id).authorize_ingress(
+            CidrIp='0.0.0.0/0',
+            FromPort=22,
+            IpProtocol='tcp',
+            ToPort=22,
+        )
 
     
     except ClientError as e:
         print(e)
 
-    return security_group_id
-
-def create_ingress_rules(ec2, security_group_id):
-    try:
-        response = ec2.authorize_security_group_ingress(
-                    GroupId=security_group_id,
-                    IpPermissions=[
-                        {
-                            "IpProtocol": "-1",
-                            "FromPort": 0,
-                            "ToPort": 65535,
-                            "IpRanges": [
-                                {
-                                    "CidrIp": "0.0.0.0/0",
-                                },
-                            ],
-                            "Ipv6Ranges": [
-                                {
-                                    "CidrIpv6": "::/0",
-                                },
-                            ],
-                        },
-                    ],
-                )
-    except ClientError as e:
-        print(e)
+    return security_group
 
 
 def delete_security_groups(ec2):

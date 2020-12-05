@@ -1,11 +1,14 @@
+import time
 from private_config import ACCESS_KEY, SECRET_KEY
 import argparse
 import boto3
 from botocore.exceptions import ClientError
 
 from key_pair import create_key_pair
-from security_group import create_security_group, create_ingress_rules
+from security_group import create_security_group
 from create_instances import create_instances
+from dns_ip_address import recup_dns_names_and_ip
+from cluster_k8s_ssh import lancer_k8s_ssh
 
 DEFAULT_USER = "amnay"
 DEFAULT_REGION = "eu-west-3"
@@ -87,17 +90,27 @@ if __name__ == "__main__":
     parse_arguments()
 
     ec2 = boto3.client(
-        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY
+        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION,
     )
 
     ec2_resource = boto3.resource(
-        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY
+        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION
     )
 
     create_key_pair(ec2, name=USER)
 
-    sg_id = create_security_group(ec2, name="lessanchoss", description="onestlahein")
+    security_group = create_security_group(ec2, ec2_resource, name="lessanchos", description="Pour notre cluster K8s")
 
-    create_ingress_rules(ec2, sg_id)
+    instances = create_instances(ec2_resource, security_group, NUMBER_NODES, USER)
 
-    instances = create_instances(ec2_resource, sg_id, NUMBER_NODES, USER)
+    # Il faut le temps que les instances soient créées et dans l'état "running"
+    time.sleep(15)
+    [dns_names, ip_adresses] = recup_dns_names_and_ip(ec2)
+
+    print(dns_names)
+    print(ip_adresses)
+    lancer_k8s_ssh(dns_names, ip_adresses, USER)
+
+
+
+

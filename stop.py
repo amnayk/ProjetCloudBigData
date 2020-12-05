@@ -1,72 +1,61 @@
-import time
-from private_config import REGION_NAME, ACCESS_KEY, SECRET_KEY, EC2_KEY_PAIR
-from botocore.exceptions import ClientError
-from botocore.config import Config
-import boto3
-from os import chdir, getcwd, remove
+from os import remove
 from os.path import isfile
+from private_config import ACCESS_KEY, SECRET_KEY
+import argparse
+import boto3
+from botocore.exceptions import ClientError
 
-chdir(getcwd())
+from key_pair import delete_keypair, delete_keypair_all
+from security_group import delete_security_groups
+from deploy import DEFAULT_REGION
+import time
 
-my_config = Config(
-    region_name=REGION_NAME,
-)
 
-client = boto3.client(
-    "ec2",
-    config=my_config,
-    aws_access_key_id=ACCESS_KEY,
-    aws_secret_access_key=SECRET_KEY,
-)
-ec2 = boto3.resource(
-    "ec2",
-    config=my_config,
-    aws_access_key_id=ACCESS_KEY,
-    aws_secret_access_key=SECRET_KEY,
-)
+def terminate_instances(ec2):
 
-# Deleting SSH key pairs
-configured_keys = [key["KeyName"]
-                   for key in client.describe_key_pairs()["KeyPairs"]]
-for keyName in configured_keys:
-    print("Deleteing key : " + keyName)
-    client.delete_key_pair(KeyName=keyName)
-    remove(keyName + ".pem")
-print("Deleted " + str(len(configured_keys)) + " keys.\n")
+    ec2_res = boto3.resource(
+        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=DEFAULT_REGION
+    )
 
-# Removing instances
-if client.describe_instances()["Reservations"] :
-    response = ec2.instances.terminate()[0]["TerminatingInstances"]
-    response = [
-        status
-        for status in response
-        if status["PreviousState"]["Name"] != status["CurrentState"]["Name"]
-    ]
-    for status in response:
-        print(
-            status["InstanceId"]
-            + " : "
-            + status["PreviousState"]["Name"]
-            + " -> "
-            + status["CurrentState"]["Name"]
-        )
-    print("Terminated " + str(len(response)) + " instances.\n")
-
-# Deleting security groups
-if client.describe_security_groups()['SecurityGroups'] :
-    # Pour permettre de close les instances on ajoute un sleep
-    # IL FAUDRAIT LE REMPLACER PAR ATTENDRE QUE LES INSTANCES LIEES AU GRP SOIT TERMINEES 
-    time.sleep(30)
-    response = client.describe_security_groups()
-    for grp in response["SecurityGroups"]:
-        if grp["GroupName"] != "default":
-            client.delete_security_group(
-                GroupId=grp["GroupId"],
+    try:
+        response = ec2_res.instances.terminate()[0]["TerminatingInstances"]
+        response = [
+            status
+            for status in response
+            if status["PreviousState"]["Name"] != status["CurrentState"]["Name"]
+        ]
+        for status in response:
+            print(
+                status["InstanceId"]
+                + " : "
+                + status["PreviousState"]["Name"]
+                + " -> "
+                + status["CurrentState"]["Name"]
             )
-            print(grp["GroupName"] + " : " + grp["GroupId"])
-    print("Deleted " + str(len(response) - 1) + " groups.\n")
+        print("Terminated " + str(len(response)) + " instances.\n")
+    except Exception as e:
+        print(e)
 
-# Remove ssh.log
-if isfile("ssh.log") :
-    remove("ssh.log")
-    print("Deleted file ssh.log")
+
+if __name__ == "__main__":
+
+    ec2 = boto3.client(
+        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=DEFAULT_REGION
+    )
+
+    delete_keypair_all(ec2)
+
+    if ec2.describe_instances()["Reservations"] :
+        terminate_instances(ec2)
+
+    if len(ec2.describe_security_groups()['SecurityGroups']) > 1 :
+        # Pour permettre de close les instances on ajoute un sleep
+        # IL FAUDRAIT LE REMPLACER PAR ATTENDRE QUE LES INSTANCES LIEES AU GRP SOIT TERMINEES 
+        time.sleep(30)
+
+        delete_security_groups(ec2)
+    
+    # Remove ssh.log
+    if isfile("ssh.log") :
+        remove("ssh.log")
+        print("Deleted file ssh.log")

@@ -1,17 +1,16 @@
-# This Python file uses the following encoding: utf-8
-from private_config import EC2_KEY_PAIR
-def create_instances(resource, security_group, keys, count, ImageId='ami-0d3f551818b21ed81', InstanceType='t2.micro'):
-    instances = resource.create_instances(ImageId=ImageId,
-                                         InstanceType=InstanceType,
-                                         KeyName=keys["KeyName"],
-                                         MaxCount=int(count),
-                                         MinCount=int(count),
-                                         NetworkInterfaces=[{'AssociatePublicIpAddress' : True, 'DeviceIndex' : 0}]
-                                         )
-                                         
+def create_instances(ec2_resource, security_group, NUMBER_NODES, USER):
+    instances = ec2_resource.create_instances(
+        ImageId="ami-0d3f551818b21ed81",
+        MinCount=1,
+        MaxCount=NUMBER_NODES,
+        InstanceType="t2.micro",
+        KeyName=USER,
+        NetworkInterfaces=[{'AssociatePublicIpAddress' : True, 'DeviceIndex' : 0}]
+    )
+
     for instance in instances: 
-        resource.Instance(instance.id).modify_attribute(
+        ec2_resource.Instance(instance.id).modify_attribute(
             Groups=[security_group["GroupId"]]
         )
 
-    return 0
+    return instances
