@@ -104,11 +104,9 @@ if __name__ == "__main__":
     instances = create_instances(ec2_resource, security_group, NUMBER_NODES, USER)
 
     # Il faut le temps que les instances soient créées et dans l'état "running"
-    time.sleep(15)
+    time.sleep(20)
     [dns_names, ip_adresses] = recup_dns_names_and_ip(ec2)
 
-    print(dns_names)
-    print(ip_adresses)
     lancer_k8s_ssh(dns_names, ip_adresses, USER)
 
 
