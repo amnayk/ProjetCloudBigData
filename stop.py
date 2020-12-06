@@ -47,12 +47,11 @@ if __name__ == "__main__":
 
     if ec2.describe_instances()["Reservations"] :
         terminate_instances(ec2)
-
-    if len(ec2.describe_security_groups()['SecurityGroups']) > 1 :
         # Pour permettre de close les instances on ajoute un sleep
         # IL FAUDRAIT LE REMPLACER PAR ATTENDRE QUE LES INSTANCES LIEES AU GRP SOIT TERMINEES 
         time.sleep(35)
 
+    if len(ec2.describe_security_groups()['SecurityGroups']) > 1 :
         delete_security_groups(ec2)
     
     # Remove ssh.log

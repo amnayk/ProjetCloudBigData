@@ -7,7 +7,6 @@ from botocore.exceptions import ClientError
 from key_pair import create_key_pair
 from security_group import create_security_group
 from create_instances import create_instances
-from dns_ip_address import recup_dns_names_and_ip
 from cluster_k8s_ssh import lancer_k8s_ssh
 
 DEFAULT_USER = "amnay"
@@ -22,7 +21,7 @@ NUMBER_WORKERS = None
 NUMBER_NODES = None
 SECURITY_GROUP = None
 
-# CLUSTER = {"Masters": []}
+CLUSTER = {"Masters": [], "Slaves" : []}
 # CLUSTER["Masters"]["addIPublic"]
 
 
@@ -101,13 +100,30 @@ if __name__ == "__main__":
 
     security_group = create_security_group(ec2, ec2_resource, name="lessanchos", description="Pour notre cluster K8s")
 
-    instances = create_instances(ec2_resource, security_group, NUMBER_NODES, USER)
-
+    [master_instances, slave_instances] = create_instances(ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, USER)
+    
     # Il faut le temps que les instances soient créées et dans l'état "running"
-    time.sleep(20)
-    [dns_names, ip_adresses] = recup_dns_names_and_ip(ec2)
+    time.sleep(120)
+    
+    for instance in master_instances:
+        CLUSTER["Masters"].append(
+            {
+            "Id_Instance": instance.id, 
+            "Ip_Address": ec2_resource.Instance(instance.id).public_ip_address, 
+            "Dns_Name": ec2_resource.Instance(instance.id).public_dns_name
+            }
+            )
+    
+    for instance in slave_instances:
+        CLUSTER["Slaves"].append(
+            {
+            "Id_Instance": instance.id, 
+            "Ip_Address": ec2_resource.Instance(instance.id).public_ip_address, 
+            "Dns_Name": ec2_resource.Instance(instance.id).public_dns_name
+            }
+            )
 
-    lancer_k8s_ssh(dns_names, ip_adresses, USER)
+    lancer_k8s_ssh(CLUSTER, USER)
 
 
 
