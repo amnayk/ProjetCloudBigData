@@ -22,8 +22,6 @@ NUMBER_NODES = None
 SECURITY_GROUP = None
 
 CLUSTER = {"Masters": [], "Slaves" : []}
-# CLUSTER["Masters"]["addIPublic"]
-
 
 def parse_arguments():
 
@@ -103,7 +101,7 @@ if __name__ == "__main__":
     [master_instances, slave_instances] = create_instances(ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, USER)
     
     # Il faut le temps que les instances soient créées et dans l'état "running"
-    time.sleep(120)
+    time.sleep(140)
     
     for instance in master_instances:
         CLUSTER["Masters"].append(

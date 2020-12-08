@@ -49,7 +49,7 @@ if __name__ == "__main__":
         terminate_instances(ec2)
         # Pour permettre de close les instances on ajoute un sleep
         # IL FAUDRAIT LE REMPLACER PAR ATTENDRE QUE LES INSTANCES LIEES AU GRP SOIT TERMINEES 
-        time.sleep(35)
+        time.sleep(40)
 
     if len(ec2.describe_security_groups()['SecurityGroups']) > 1 :
         delete_security_groups(ec2)
