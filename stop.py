@@ -9,6 +9,7 @@ from key_pair import delete_keypair, delete_keypair_all
 from security_group import delete_security_groups
 from deploy import DEFAULT_REGION
 import time
+#tentative elian
 
 
 def terminate_instances(ec2):
