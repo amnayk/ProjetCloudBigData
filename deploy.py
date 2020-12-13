@@ -16,7 +16,8 @@ USER = None
 NUMBER_MASTERS = None
 NUMBER_WORKERS = None
 NUMBER_NODES = None
-SECURITY_GROUP = None
+SECURITY_GROUP = "lessanchos"
+SECURITY_GROUP_DESC = "Pour notre cluster K8s"
 
 CLUSTER = {"Masters": [], "Slaves": []}
 
@@ -82,14 +83,17 @@ if __name__ == "__main__":
         "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION_NAME
     )
 
-    print("Generating keypairs")
+    # Key pairs
+    print("\nGenerating keypairs")
     try:
         create_key_pair(ec2, name=USER+"_key")
     except Exception as e:
         print(e)
 
+    # Security groups
+    print("\nGenerating security group : " + SECURITY_GROUP)
     security_group = create_security_group(
-        ec2, ec2_resource, name="lessanchos", description="Pour notre cluster K8s")
+        ec2, ec2_resource, name=SECURITY_GROUP, description=SECURITY_GROUP_DESC)
 
     [master_instances, slave_instances] = create_instances(
         ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, USER)

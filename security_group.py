@@ -45,18 +45,34 @@ def parse_arguments():
 
 
 def create_security_group(ec2, ec2_resource, name=DEFAULT_NAME, description=DEFAULT_DESC):
+    # get VPCs
     response = ec2.describe_vpcs()
     vpc_id = response.get("Vpcs", [{}])[0].get("VpcId", "")
-    try:
+
+    # get already configured security groups
+    response = ec2.describe_security_groups()
+    security_groups = [grp["GroupName"]
+                       for grp in response["SecurityGroups"]]
+    print("Found", security_groups, "online.")
+
+    # return the security group if it already exists
+    if name in security_groups:
+        print(name + " already created, returning it instead.")
+        security_group = response["SecurityGroups"][security_groups.index(
+            name)]
+        security_group_id = security_group["GroupId"]
+
+    # create it if it doesn't
+    else:
         security_group = ec2.create_security_group(
             GroupName=name, Description=description, VpcId=vpc_id
         )
 
         security_group_id = security_group["GroupId"]
-        print("Security Group Created %s in vpc %s (%s)." %
+        print("Security group created %s in vpc %s (%s)." %
               (security_group_id, vpc_id, name))
 
-        # Autoriser uniquement les requêtes ssh
+        # Only allow ssh connections
         ec2_resource.SecurityGroup(security_group_id).authorize_ingress(
             CidrIp='0.0.0.0/0',
             # FromPort=22,
@@ -65,10 +81,7 @@ def create_security_group(ec2, ec2_resource, name=DEFAULT_NAME, description=DEFA
             # ToPort=22,
         )
 
-        return security_group
-    except ClientError as e:
-        print(e)
-        sys.exit(-1)
+    return security_group
 
 
 def delete_security_groups(ec2):
