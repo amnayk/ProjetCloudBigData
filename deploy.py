@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     print("Generating keypairs")
     try:
-        create_key_pair(ec2, name=USER)
+        create_key_pair(ec2, name=USER+"_key")
     except Exception as e:
         print(e)
 
