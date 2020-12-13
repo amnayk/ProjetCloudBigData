@@ -39,26 +39,29 @@ def parse_arguments():
 
 
 def create_key_pair(ec2, name=DEFAULT_NAME):
-    # create a file to store the key locally
     try:
-        outfile = open(name + ".pem", "w")
-    except PermissionError:
-        print(name + ".pem already exists, modifying it")
-        os.chmod(name + ".pem", 0o777)
-        outfile = open(name + ".pem", "w")
-    os.chmod(name + ".pem", 0o400)
+        # create a file to store the key locally
+        try:
+            outfile = open(name + ".pem", "w")
+        except PermissionError:
+            print(name + ".pem already exists, modifying it")
+            os.chmod(name + ".pem", 0o777)
+            outfile = open(name + ".pem", "w")
+        os.chmod(name + ".pem", 0o400)
 
-    try:
-        # call the boto ec2 function to create a key pair
-        key_pair = ec2.create_key_pair(KeyName=name)
-        # capture the key and store it in a file
-        KeyPairOut = key_pair["KeyMaterial"]
-        # print(key_pair)
-        print("Key Pair generated : " + name)
-        outfile.write(KeyPairOut)
-    except ClientError as identifier:
-        print("Key Pair already exists, try delete")
-        return
+        try:
+            # call the boto ec2 function to create a key pair
+            key_pair = ec2.create_key_pair(KeyName=name)
+            # capture the key and store it in a file
+            KeyPairOut = key_pair["KeyMaterial"]
+            # print(key_pair)
+            print("Key Pair generated : " + name)
+            outfile.write(KeyPairOut)
+        except ClientError as identifier:
+            raise Exception("Key Pair already exists, try delete")
+    except Exception as e:
+        print(e)
+        raise Exception("Creating keys failed, check key_pair.py manually.")
 
 
 def delete_keypair(ec2, name=DEFAULT_NAME):
