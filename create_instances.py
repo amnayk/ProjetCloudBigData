@@ -1,17 +1,27 @@
-# This Python file uses the following encoding: utf-8
-from private_config import EC2_KEY_PAIR
-def create_instances(resource, security_group, keys, count, ImageId='ami-0d3f551818b21ed81', InstanceType='t2.micro'):
-    instances = resource.create_instances(ImageId=ImageId,
-                                         InstanceType=InstanceType,
-                                         KeyName=keys["KeyName"],
-                                         MaxCount=int(count),
-                                         MinCount=int(count),
-                                         NetworkInterfaces=[{'AssociatePublicIpAddress' : True, 'DeviceIndex' : 0}]
-                                         )
-                                         
-    for instance in instances: 
-        resource.Instance(instance.id).modify_attribute(
+def create_instances(ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, USER):
+    master_instances = ec2_resource.create_instances(
+        ImageId="ami-0d3f551818b21ed81",
+        MinCount=1,
+        MaxCount=NUMBER_MASTERS,
+        InstanceType="t2.micro",
+        KeyName=USER,
+        NetworkInterfaces=[{'AssociatePublicIpAddress': True, 'DeviceIndex' : 0}],
+        TagSpecifications=[{'ResourceType': "instance", 'Tags':[{'Key': "Type", 'Value': "Master"}]}]
+    )
+
+    slave_instances = ec2_resource.create_instances(
+        ImageId="ami-0d3f551818b21ed81",
+        MinCount=1,
+        MaxCount=NUMBER_WORKERS,
+        InstanceType="t2.micro",
+        KeyName=USER,
+        NetworkInterfaces=[{'AssociatePublicIpAddress' : True, 'DeviceIndex' : 0}],
+        TagSpecifications=[{'ResourceType': "instance", 'Tags':[{'Key': "Type", 'Value': "Slave"}]}]
+    )
+
+    for instance in [slave_instances, master_instances]: 
+        ec2_resource.Instance(instance[0].id).modify_attribute(
             Groups=[security_group["GroupId"]]
         )
 
-    return 0
+    return [master_instances, slave_instances]
