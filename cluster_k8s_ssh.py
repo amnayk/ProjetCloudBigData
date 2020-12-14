@@ -1,7 +1,4 @@
-import time
-from boto3 import NullHandler
 import paramiko
-
 
 def lancer_k8s_ssh(CLUSTER, KEY_NAME):
     k = paramiko.RSAKey.from_private_key_file(KEY_NAME + '.pem')
@@ -29,7 +26,6 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
             pass
         ssh.exec_command(
             'curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -')
-        #ssh.exec_command('echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list')
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
             'sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"')
         for line in iter(ssh_stdout.readline, ""):
@@ -42,6 +38,13 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
             'yes | sudo apt-get install kubelet kubeadm kubectl')
         for line in iter(ssh_stdout.readline, ""):
             pass
+        for master in CLUSTER["Masters"]:
+            ssh.exec_command(
+            'echo "' + master["Ip_Address"] + '   master" | sudo tee -a /etc/hosts')
+        for slave in CLUSTER["Slaves"]:
+            ssh.exec_command(
+            'echo "' + slave["Ip_Address"] + '  '+ slave["Id_Slave"] + '" | sudo tee -a /etc/hosts')
+
 
     cmd_slave = ""
 
@@ -49,8 +52,6 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
     for master in CLUSTER["Masters"]:
         ssh.connect(hostname=master["Dns_Name"], username='ubuntu', pkey=k)
         ssh.exec_command('sudo hostnamectl set-hostname master')
-        ssh.exec_command(
-            'echo "' + master["Ip_Address"] + '   master" | sudo tee -a /etc/hosts')
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
             'sudo kubeadm init --ignore-preflight-errors=NumCPU,Mem --pod-network-cidr=10.0.0.0/16')
         for line in iter(ssh_stdout.readline, ""):
@@ -62,18 +63,17 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
         ssh.exec_command(
             'sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config')
         ssh.exec_command('sudo chown $(id -u):$(id -g) $HOME/.kube/config')
-        ssh.exec_command(
+        ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
             'kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml')
-        time.sleep(30)
+        for line in iter(ssh_stdout.readline, ""):
+            pass
 
     # Lancement de k8s sur les slave nodes
     for slave in CLUSTER["Slaves"]:
         ssh.connect(hostname=slave["Dns_Name"], username='ubuntu', pkey=k)
-        ssh.exec_command('sudo hostnamectl set-hostname slave')
-        ssh.exec_command(
-            'echo "' + slave["Ip_Address"] + '   slave" | sudo tee -a /etc/hosts')
+        ssh.exec_command('sudo hostnamectl set-hostname ' + slave["Id_Slave"])
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
-            'sudo ' + cmd_slave + ' --ignore-preflight-errors=NumCPU')
+            'sudo ' + cmd_slave + ' --ignore-preflight-errors=NumCPU,Mem')
         for line in iter(ssh_stdout.readline, ""):
             pass
 

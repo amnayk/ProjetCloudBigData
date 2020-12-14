@@ -1,14 +1,11 @@
 from os import remove
 from os.path import isfile
 from private_config import ACCESS_KEY, SECRET_KEY, username, REGION_NAME
-import argparse
 import boto3
-from botocore.exceptions import ClientError
 
 from key_pair import delete_keypair_all
 from security_group import delete_security_groups
 import time
-#tentative elian
 
 
 def terminate_instances(ec2):
