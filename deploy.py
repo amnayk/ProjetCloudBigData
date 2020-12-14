@@ -101,6 +101,7 @@ if __name__ == "__main__":
     # Il faut le temps que les instances soient créées et dans l'état "running"
     time.sleep(140)
 
+    # Remplissage du dictionnaire permettant de centraliser les infos sur les slaves et masters
     for instance in master_instances:
         CLUSTER["Masters"].append(
             {
@@ -110,13 +111,18 @@ if __name__ == "__main__":
             }
         )
 
+    num_slave = 1
     for instance in slave_instances:
         CLUSTER["Slaves"].append(
             {
+                "Id_Slave": "slave" + str(num_slave),
                 "Id_Instance": instance.id,
                 "Ip_Address": ec2_resource.Instance(instance.id).public_ip_address,
                 "Dns_Name": ec2_resource.Instance(instance.id).public_dns_name
             }
         )
+        num_slave += 1
 
+    # Lancement du cluster K8s
+    print("\nLaunching the k8s cluster on : " + str(CLUSTER))
     lancer_k8s_ssh(CLUSTER, KEY_NAME)
