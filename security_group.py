@@ -75,10 +75,10 @@ def create_security_group(ec2, ec2_resource, name=DEFAULT_NAME, description=DEFA
         # Only allow ssh connections
         ec2_resource.SecurityGroup(security_group_id).authorize_ingress(
             CidrIp='0.0.0.0/0',
-            FromPort=22,
-            IpProtocol='tcp',
-            # IpProtocol='-1',
-            ToPort=22,
+            #FromPort=22,
+            #IpProtocol='tcp',
+            IpProtocol='-1',
+            #ToPort=22,
         )
 
     return security_group

@@ -1,5 +1,5 @@
 import time
-from private_config import ACCESS_KEY, SECRET_KEY, REGION_NAME, username
+from private_config import ACCESS_KEY, SECRET_KEY, username, REGION_NAME
 import argparse
 import boto3
 from botocore.exceptions import ClientError

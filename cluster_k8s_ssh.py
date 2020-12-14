@@ -52,7 +52,7 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
         ssh.exec_command(
             'echo "' + master["Ip_Address"] + '   master" | sudo tee -a /etc/hosts')
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
-            'sudo kubeadm init --ignore-preflight-errors=NumCPU --pod-network-cidr=10.0.0.0/16')
+            'sudo kubeadm init --ignore-preflight-errors=NumCPU,Mem --pod-network-cidr=10.0.0.0/16')
         for line in iter(ssh_stdout.readline, ""):
             if line[0:7] == "kubeadm":
                 cmd_slave = line[0:len(line)-2]
