@@ -9,8 +9,8 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     paramiko.util.log_to_file("ssh.log")
 
-    for vm in [CLUSTER["Masters"], CLUSTER["Slaves"]]:
-        ssh.connect(hostname=vm[0]["Dns_Name"], username='ubuntu', pkey=k)
+    for vm in CLUSTER["Masters"] + CLUSTER["Slaves"]:
+        ssh.connect(hostname=vm["Dns_Name"], username='ubuntu', pkey=k)
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
             'sudo apt-get update -y')
         for line in iter(ssh_stdout.readline, ""):

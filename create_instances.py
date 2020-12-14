@@ -23,9 +23,8 @@ def create_instances(ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTER
                             'Tags': [{'Key': "Type", 'Value': "Slave"}]}]
     )
 
-    print(slave_instances)
     for instance in slave_instances + master_instances:
-        ec2_resource.Instance(instance[0].id).modify_attribute(
+        ec2_resource.Instance(instance.id).modify_attribute(
             Groups=[security_group["GroupId"]]
         )
 
