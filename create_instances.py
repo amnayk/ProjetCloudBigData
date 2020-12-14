@@ -1,12 +1,14 @@
-def create_instances(ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, USER):
+def create_instances(ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, KEY_NAME):
     master_instances = ec2_resource.create_instances(
         ImageId="ami-0d3f551818b21ed81",
         MinCount=1,
         MaxCount=NUMBER_MASTERS,
         InstanceType="t2.micro",
-        KeyName=USER,
-        NetworkInterfaces=[{'AssociatePublicIpAddress': True, 'DeviceIndex' : 0}],
-        TagSpecifications=[{'ResourceType': "instance", 'Tags':[{'Key': "Type", 'Value': "Master"}]}]
+        KeyName=KEY_NAME,
+        NetworkInterfaces=[
+            {'AssociatePublicIpAddress': True, 'DeviceIndex': 0}],
+        TagSpecifications=[{'ResourceType': "instance",
+                            'Tags': [{'Key': "Type", 'Value': "Master"}]}]
     )
 
     slave_instances = ec2_resource.create_instances(
@@ -14,13 +16,15 @@ def create_instances(ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTER
         MinCount=1,
         MaxCount=NUMBER_WORKERS,
         InstanceType="t2.micro",
-        KeyName=USER,
-        NetworkInterfaces=[{'AssociatePublicIpAddress' : True, 'DeviceIndex' : 0}],
-        TagSpecifications=[{'ResourceType': "instance", 'Tags':[{'Key': "Type", 'Value': "Slave"}]}]
+        KeyName=KEY_NAME,
+        NetworkInterfaces=[
+            {'AssociatePublicIpAddress': True, 'DeviceIndex': 0}],
+        TagSpecifications=[{'ResourceType': "instance",
+                            'Tags': [{'Key': "Type", 'Value': "Slave"}]}]
     )
 
-    for instance in [slave_instances, master_instances]: 
-        ec2_resource.Instance(instance[0].id).modify_attribute(
+    for instance in slave_instances + master_instances:
+        ec2_resource.Instance(instance.id).modify_attribute(
             Groups=[security_group["GroupId"]]
         )
 
