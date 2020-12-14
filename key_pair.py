@@ -2,10 +2,10 @@ import argparse
 import boto3
 import os
 from botocore.config import Config
-from private_config import ACCESS_KEY, SECRET_KEY, REGION_NAME
+from private_config import ACCESS_KEY, SECRET_KEY, REGION_NAME, username
 from botocore.exceptions import ClientError
 
-DEFAULT_NAME = "user_keypair"
+DEFAULT_NAME = username+"_key"
 
 
 def parse_arguments():
