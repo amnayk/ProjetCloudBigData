@@ -1,13 +1,12 @@
 from os import remove
 from os.path import isfile
-from private_config import ACCESS_KEY, SECRET_KEY
+from private_config import ACCESS_KEY, SECRET_KEY, username, REGION_NAME
 import argparse
 import boto3
 from botocore.exceptions import ClientError
 
-from key_pair import delete_keypair, delete_keypair_all
+from key_pair import delete_keypair_all
 from security_group import delete_security_groups
-from deploy import DEFAULT_REGION
 import time
 #tentative elian
 
@@ -15,7 +14,7 @@ import time
 def terminate_instances(ec2):
 
     ec2_res = boto3.resource(
-        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=DEFAULT_REGION
+        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION_NAME
     )
 
     try:
@@ -41,7 +40,7 @@ def terminate_instances(ec2):
 if __name__ == "__main__":
 
     ec2 = boto3.client(
-        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=DEFAULT_REGION
+        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION_NAME
     )
 
     delete_keypair_all(ec2)

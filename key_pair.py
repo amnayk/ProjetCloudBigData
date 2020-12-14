@@ -2,10 +2,10 @@ import argparse
 import boto3
 import os
 from botocore.config import Config
-from private_config import ACCESS_KEY, SECRET_KEY, REGION_NAME
+from private_config import ACCESS_KEY, SECRET_KEY, REGION_NAME, username
 from botocore.exceptions import ClientError
 
-DEFAULT_NAME = "user_keypair"
+DEFAULT_NAME = username+"_key"
 
 
 def parse_arguments():
@@ -39,6 +39,14 @@ def parse_arguments():
 
 
 def create_key_pair(ec2, name=DEFAULT_NAME):
+
+    # call the boto ec2 function to create a key pair
+    try:
+        key_pair = ec2.create_key_pair(KeyName=name)
+    except ClientError:
+        print("Key Pair already exists online. If you lost .pem file try delete.")
+        return
+
     # create a file to store the key locally
     try:
         outfile = open(name + ".pem", "w")
@@ -48,17 +56,12 @@ def create_key_pair(ec2, name=DEFAULT_NAME):
         outfile = open(name + ".pem", "w")
     os.chmod(name + ".pem", 0o400)
 
-    try:
-        # call the boto ec2 function to create a key pair
-        key_pair = ec2.create_key_pair(KeyName=name)
-        # capture the key and store it in a file
-        KeyPairOut = key_pair["KeyMaterial"]
-        # print(key_pair)
-        print("Key Pair generated : " + name)
-        outfile.write(KeyPairOut)
-    except ClientError as identifier:
-        print("Key Pair already exists, try delete")
-        return
+    # capture the key and store it in a file
+    KeyPairOut = key_pair["KeyMaterial"]
+    # print(key_pair)
+    print("Key Pair generated : " + name)
+    outfile.write(KeyPairOut)
+    return
 
 
 def delete_keypair(ec2, name=DEFAULT_NAME):
