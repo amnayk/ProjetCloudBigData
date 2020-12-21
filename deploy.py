@@ -98,6 +98,8 @@ if __name__ == "__main__":
     [master_instances, slave_instances] = create_instances(
         ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, KEY_NAME)
 
+    print("\nLaunching instances ...")
+
     # Il faut le temps que les instances soient créées et dans l'état "running"
     time.sleep(140)
 

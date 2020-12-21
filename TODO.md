@@ -1,6 +1,19 @@
+### Todo
 
+- [ ] Use Kube-opex-analytics
+- [ ] Deploy Hadoop & Spark 
+- [ ] Run Wordcount
+- [ ] Report 
 
-- qu'on supprime des instances, un sec_group, on devrait supprimer que ceux liés à notre compte IAM
-- mettre en place une structure de donnée où seront rassemblées toutes les infos des noeuds du cluster :
-  - adresses ip privées/publique
-  - adresses DNS
+### In Progress
+
+- [ ] stop.py : bug de security group
+
+### Done ✓
+
+- [x] Generate key pairs for ssh connection to VMs
+- [x] Create security groups
+- [x] Deploy instances
+  - [x] Dictionnary for the cluster's architecture
+- [x] Deploy Kubernetes
+ 
