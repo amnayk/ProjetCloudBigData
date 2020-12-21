@@ -7,7 +7,7 @@
 
 ### In Progress
 
-- [ ] Work
+- [ ] stop.py : bug de security group
 
 ### Done ✓
 
