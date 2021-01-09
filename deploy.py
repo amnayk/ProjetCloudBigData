@@ -101,7 +101,7 @@ if __name__ == "__main__":
     print("\nLaunching instances ...")
 
     # Il faut le temps que les instances soient créées et dans l'état "running"
-    time.sleep(140)
+    time.sleep(180)
 
     # Remplissage du dictionnaire permettant de centraliser les infos sur les slaves et masters
     for instance in master_instances:

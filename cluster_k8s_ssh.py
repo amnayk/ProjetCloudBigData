@@ -40,11 +40,10 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
             pass
         for master in CLUSTER["Masters"]:
             ssh.exec_command(
-            'echo "' + master["Ip_Address"] + '   master" | sudo tee -a /etc/hosts')
+                'echo "' + master["Ip_Address"] + '   master" | sudo tee -a /etc/hosts')
         for slave in CLUSTER["Slaves"]:
             ssh.exec_command(
-            'echo "' + slave["Ip_Address"] + '  '+ slave["Id_Slave"] + '" | sudo tee -a /etc/hosts')
-
+                'echo "' + slave["Ip_Address"] + '  ' + slave["Id_Slave"] + '" | sudo tee -a /etc/hosts')
 
     cmd_slave = ""
 
