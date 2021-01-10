@@ -1,3 +1,0 @@
-jar cf wc.jar ~/eclipse-wspace/ProjetBigSanchos/wordCount
-spark-submit     --master k8s://https://172.31.5.246:6443     --deploy-mode cluster     --class WordCount     --conf spark.executor.instances=3     --conf spark.kubernetes.container.image=bitnami/spark     wc.jar
-spark-submit     --master k8s://https://172.31.5.246:6443     --deploy-mode cluster     --name spark-pi     --class  org.apache.spark.examples.SparkPi    --conf spark.executor.instances=1     --conf spark.kubernetes.container.image=spark:latest   --conf spark.kubernetes.driver.pod.name=spark-pi-driver      --conf spark.kubernetes.container.image.pullPolicy=Never      --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark   wc.jar
