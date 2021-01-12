@@ -62,7 +62,7 @@ def parse_arguments():
     args = parser.parse_args()
 
     USER = args.user or username
-    KEY_NAME = USER + '_key'
+    KEY_NAME = USER + "_key"
     NUMBER_MASTERS = args.nb_masters or DEFAULT_NUMBER_MASTERS
     NUMBER_WORKERS = args.nb_workers or DEFAULT_NUMBER_WORKERS
     NUMBER_NODES = NUMBER_MASTERS + NUMBER_WORKERS
@@ -76,27 +76,35 @@ if __name__ == "__main__":
     parse_arguments()
 
     ec2 = boto3.client(
-        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION_NAME,
+        "ec2",
+        aws_access_key_id=ACCESS_KEY,
+        aws_secret_access_key=SECRET_KEY,
+        region_name=REGION_NAME,
     )
 
     ec2_resource = boto3.resource(
-        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION_NAME
+        "ec2",
+        aws_access_key_id=ACCESS_KEY,
+        aws_secret_access_key=SECRET_KEY,
+        region_name=REGION_NAME,
     )
 
     # Key pairs
     print("\nGenerating keypairs")
     try:
-        create_key_pair(ec2, name=USER+"_key")
+        create_key_pair(ec2, name=USER + "_key")
     except Exception as e:
         print(e)
 
     # Security groups
     print("\nGenerating security group : " + SECURITY_GROUP)
     security_group = create_security_group(
-        ec2, ec2_resource, name=SECURITY_GROUP, description=SECURITY_GROUP_DESC)
+        ec2, ec2_resource, name=SECURITY_GROUP, description=SECURITY_GROUP_DESC
+    )
 
     [master_instances, slave_instances] = create_instances(
-        ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, KEY_NAME)
+        ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, KEY_NAME
+    )
 
     print("\nLaunching instances ...")
 
@@ -109,21 +117,19 @@ if __name__ == "__main__":
             {
                 "Id_Instance": instance.id,
                 "Ip_Address": ec2_resource.Instance(instance.id).public_ip_address,
-                "Dns_Name": ec2_resource.Instance(instance.id).public_dns_name
+                "Dns_Name": ec2_resource.Instance(instance.id).public_dns_name,
             }
         )
 
-    num_slave = 1
-    for instance in slave_instances:
+    for num_slave, instance in enumerate(slave_instances):
         CLUSTER["Slaves"].append(
             {
-                "Id_Slave": "slave" + str(num_slave),
+                "Id_Slave": "slave" + str(num_slave + 1),
                 "Id_Instance": instance.id,
                 "Ip_Address": ec2_resource.Instance(instance.id).public_ip_address,
-                "Dns_Name": ec2_resource.Instance(instance.id).public_dns_name
+                "Dns_Name": ec2_resource.Instance(instance.id).public_dns_name,
             }
         )
-        num_slave += 1
 
     # Lancement du cluster K8s
     print("\nLaunching the k8s cluster on : " + str(CLUSTER))
