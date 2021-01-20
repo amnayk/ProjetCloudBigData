@@ -26,27 +26,37 @@ jar cf wc.jar ~/eclipse-wspace/ProjetBigSanchos/wordCount
 
 ##
 
-Installer java jdk 8 sur le master :
+# Installer java jdk 8 sur le master :
 sudo apt install openjdk-8-jre-headless
 
-Installer Spark sur le master :
+# Installer Spark sur le master :
 wget http://sd-127206.dedibox.fr/hagimont/software/spark-2.4.3-bin-hadoop2.7.tgz
 tar zxvf spark-2.4.3-bin-hadoop2.7.tgz
 
-Mettre dans le bashrc du master :
+# Mettre dans le bashrc du master :
 export JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-amd64"
 export SPARK_HOME="/home/ubuntu/spark-2.4.3-bin-hadoop2.7"
 export PATH="$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin"
 
-Rendre effectif les export de variables d'enviro sur le master tjrs :
+# Rendre effectif les export de variables d'enviro sur le master tjrs :
 source .bashrc
 
-Passer en ssh depuis ma machine le wc.jar :
+# build docker image
+
+cd spark-2.4.3-bin-hadoop2.7/ 
+sudo bin/docker-image-tool.sh -r spark -t latest build
+
+
+# Passer en ssh depuis ma machine le wc.jar :
 scp -i sam_key.pem wc.jar ubuntu@<NOMDNSDUMASTER>:.
 
-Lancer Spark Submit :
+# Lancer Spark Submit :
 mettre en route le proxy sur le master : kubectl proxy
-ouvrir un autre term et :
+
+
+# ouvrir un autre term et :
 spark-submit     --master k8s://https://<AdresseMaster(kubectl cluster-info) OU localhost>:6443     --deploy-mode cluster     --name spark-pi     --class org.apache.spark.examples.SparkPi     --conf spark.executor.instances=1     --conf spark.kubernetes.container.image=vitamingaugau/spark:spark-2.4.4     wc.jar
+
+
 ouvrir un autre term pour monitorer et voir les logs de notre lancement :
 kubectl get events --sort-by=.metadata.creationTimestamp
