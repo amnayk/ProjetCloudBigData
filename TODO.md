@@ -1,12 +1,10 @@
 ### Todo
 
-- [ ] Put a username tag on instances to give exclusivity to each user on its instances (So that we can stop only our instances)
 - [ ] Use Kube-opex-analytics
 - [ ] Report 
 
 ### In Progress
 
-- [ ] stop.py : bug de security group
 - [**] Deploy Hadoop & Spark & Run WordCount
 
 ### Done ✓
@@ -57,3 +55,6 @@ On peut aussi voir les logs sur un pods :
 kubectl logs <IdDuPod>
 
 spark-submit     --master k8s://https://<AdresseMaster(kubectl cluster-info) OU localhost>:6443     --deploy-mode cluster     --name WordCount     --class WordCount     --conf spark.executor.instances=2     --conf spark.kubernetes.container.image=vitamingaugau/spark:spark-2.4.4     wc.jar
+- [x] add env variable without accessing .bashrc
+- [x] Try to run commands without dockerfile
+- [x] Put a username tag on instances to give exclusivity to each user on its instances (So that we can stop only our instances)
