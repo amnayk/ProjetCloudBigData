@@ -1,22 +1,38 @@
+kubectl get events --sort-by=.metadata.creationTimestamp
+
+
+
 # install jdk 14.0.1
-sudo apt install openjdk-14-jre-headless 
+sudo apt install openjdk-14-jre-headless -y
 
 # Installer Spark sur le master :
 wget http://sd-127206.dedibox.fr/hagimont/software/spark-2.4.3-bin-hadoop2.7.tgz
+
+
 tar zxvf spark-2.4.3-bin-hadoop2.7.tgz
 
 # Mettre dans le bashrc du master :
-export JAVA_HOME="/usr/lib/jvm/java-14-openjdk-amd64"
+
+echo 'export JAVA_HOME="/usr/lib/jvm/java-14-openjdk-amd64"
 export SPARK_HOME="/home/ubuntu/spark-2.4.3-bin-hadoop2.7"
-export PATH="$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin"
+export PATH="$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin"' >> ~/.bashrc
+
 
 # Sourcer le bashrc
 
 source .bashrc
 
-# copier wordcount
+# copier wordcount et docker file depuis machine perso
+import os, os.system("cmd")
 
-scp -i amnay_key.pem -r wordcount/ ubuntu@ec2-35-180-73-9.eu-west-3.compute.amazonaws.com:~/spark-2.4.3-bin-hadoop2.7/
+scp -i amnay_key.pem -r wordcount ubuntu@ec2-52-47-45-71.eu-west-3.compute.amazonaws.com:~/spark-2.4.3-bin-hadoop2.7
+
+scp -i amnay_key.pem -r Dockerfile ubuntu@ec2-52-47-45-71.eu-west-3.compute.amazonaws.com:~/spark-2.4.3-bin-hadoop2.7/kubernetes/dockerfiles/spark/Dockerfile
+
+# changer kuberneters client
+
+RUN rm /opt/spark/jars/kubernetes-client-4.1.2.jar
+ADD https://repo1.maven.org/maven2/io/fabric8/kubernetes-client/4.4.2/kubernetes-client-4.4.2.jar /opt/spark/jars
 
 # login
 
@@ -28,9 +44,9 @@ docker login
 
 cd spark-2.4.3-bin-hadoop2.7/ 
 
-sudo bin/docker-image-tool.sh -r docker.io/amnayk -t latest build
+sudo bin/docker-image-tool.sh -r docker.io/amnayk -t latest100 build
 
-sudo bin/docker-image-tool.sh -r docker.io/amnayk -t latest push
+sudo bin/docker-image-tool.sh -r docker.io/amnayk -t latest100 push
 
 # we need to create a service account with kubectl for Spark:
 
@@ -45,18 +61,41 @@ kubectl proxy&
 
 spark-submit \
   --deploy-mode cluster \
-  --class home.sam.eclipse-wspace.ProjetBigSanchos.wordCount.WordCount \
-  --master k8s://https://172.31.17.72:6443\
+  --class wordCount.WordCount \
+  --master k8s://https://172.31.21.96:6443\
   --conf spark.executor.instances=3 \
   --conf spark.app.name=wc \
-  --conf spark.kubernetes.container.image=amnayk/spark \
+  --conf spark.kubernetes.container.image=amnayk/spark:latest100 \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-  local:///opt/spark/wordcount/wc.jar
+  local:///opt/spark/work-dir/wc.jar
 
 
   local:///opt/spark/examples/jars/spark-examples_2.11-2.4.3.jar	
   
   
+
+# spark-pi
+
+
+spark-submit \
+    --master k8s://https://172.31.23.158:6443 \
+    --deploy-mode cluster \
+    --name spark-pi \
+    --class org.apache.spark.examples.SparkPi \
+    --conf spark.executor.instances=3 \
+    --conf spark.kubernetes.container.image=amnayk/spark:latest4 \
+    --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+    local:///opt/spark/examples/jars/spark-examples_2.11-2.4.3.jar
+
+
+
+
+
+
+
+
+
+
 
 
 
