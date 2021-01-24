@@ -101,17 +101,18 @@ if __name__ == "__main__":
     [master_instances, slave_instances] = create_instances(
         ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, KEY_NAME)
 
-
     # Il faut le temps que les instances soient créées et dans l'état "running"
-    id_filter =  [
+    id_filter = [
         {
             'Name': 'instance-id',
             'Values': [instance.id for instance in master_instances] + [instance.id for instance in slave_instances]
         },
     ]
-    print("    Instances are : "+str([instance.id for instance in master_instances] + [instance.id for instance in slave_instances]))
+    print("    Instances are : "+str([instance.id for instance in master_instances] + [
+          instance.id for instance in slave_instances]))
     while (is_pending(id_filter, ec2)):
         time.sleep(5)
+    time.sleep(5)
     print("Instances running !")
 
     # Remplissage du dictionnaire permettant de centraliser les infos sur les slaves et masters
@@ -141,11 +142,13 @@ if __name__ == "__main__":
     print("Cluster is : ")
     print("Masters")
     for master in CLUSTER['Masters']:
-        print("    " + str(master['Id_Instance']) + " at " + str(master['Ip_Address']) + " under " + str(master['Dns_Name']))
+        print("    " + str(master['Id_Instance']) + " at " +
+              str(master['Ip_Address']) + " under " + str(master['Dns_Name']))
     print("Slaves")
     for slaves in CLUSTER['Slaves']:
-        print("    " + str(slaves['Id_Instance']) + " at " + str(slaves['Ip_Address']) + " under " + str(slaves['Dns_Name']))
-    
+        print("    " + str(slaves['Id_Instance']) + " at " +
+              str(slaves['Ip_Address']) + " under " + str(slaves['Dns_Name']))
+
     lancer_k8s_ssh(CLUSTER, KEY_NAME)
-    
+
     print("Deployed successfully")
