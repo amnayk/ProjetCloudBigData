@@ -7,16 +7,23 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
     paramiko.util.log_to_file("ssh.log")
 
     for vm in CLUSTER["Masters"] + CLUSTER["Slaves"]:
+        print("Installing "+str(vm['Id_Instance']))
         ssh.connect(hostname=vm["Dns_Name"], username='ubuntu', pkey=k)
+
+        print("    apt-get update...")
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
             'sudo apt-get update -y')
         for line in iter(ssh_stdout.readline, ""):
             pass
+
         ssh.exec_command('swapoff -a')
+
+        print("    fetching Docker...")
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
             'sudo wget -qO- https://get.docker.com/ | sh')
         for line in iter(ssh_stdout.readline, ""):
             pass
+
         ssh.exec_command('sudo modprobe br_netfilter')
         ssh.exec_command(
             'echo "net.bridge.bridge-nf-call-ip6tables = 1\nnet.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.d/k8s.conf')
@@ -24,6 +31,8 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
             'sudo sysctl --system')
         for line in iter(ssh_stdout.readline, ""):
             pass
+
+        print("    fetching Kubernetes...")
         ssh.exec_command(
             'curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -')
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
@@ -50,6 +59,7 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
 
     # Lancement de k8s sur les master nodes
     for master in CLUSTER["Masters"]:
+        print("Launching Kubernetes on master "+str(master['Id_Instance']))
         ssh.connect(hostname=master["Dns_Name"], username='ubuntu', pkey=k)
         ssh.exec_command('sudo hostnamectl set-hostname master')
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
@@ -70,6 +80,7 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
 
     # Lancement de k8s sur les slave nodes
     for slave in CLUSTER["Slaves"]:
+        print("Launching Kubernetes on slave "+str(slave['Id_Instance']))
         ssh.connect(hostname=slave["Dns_Name"], username='ubuntu', pkey=k)
         ssh.exec_command('sudo hostnamectl set-hostname ' + slave["Id_Slave"])
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(

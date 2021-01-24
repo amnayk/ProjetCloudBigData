@@ -8,6 +8,7 @@ from key_pair import create_key_pair
 from security_group import create_security_group
 from create_instances import create_instances
 from cluster_k8s_ssh import lancer_k8s_ssh
+from utils import is_pending
 
 DEFAULT_NUMBER_MASTERS = 1
 DEFAULT_NUMBER_WORKERS = 2
@@ -95,13 +96,23 @@ if __name__ == "__main__":
     security_group = create_security_group(
         ec2, ec2_resource, name=SECURITY_GROUP, description=SECURITY_GROUP_DESC)
 
+    # Instances
+    print("\nLaunching instances ...")
     [master_instances, slave_instances] = create_instances(
         ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, KEY_NAME)
 
-    print("\nLaunching instances ...")
 
     # Il faut le temps que les instances soient créées et dans l'état "running"
-    time.sleep(140)
+    id_filter =  [
+        {
+            'Name': 'instance-id',
+            'Values': [instance.id for instance in master_instances] + [instance.id for instance in slave_instances]
+        },
+    ]
+    print("    Instances are : "+str([instance.id for instance in master_instances] + [instance.id for instance in slave_instances]))
+    while (is_pending(id_filter, ec2)):
+        time.sleep(5)
+    print("Instances running !")
 
     # Remplissage du dictionnaire permettant de centraliser les infos sur les slaves et masters
     for instance in master_instances:
@@ -126,5 +137,15 @@ if __name__ == "__main__":
         num_slave += 1
 
     # Lancement du cluster K8s
-    print("\nLaunching the k8s cluster on : " + str(CLUSTER))
+    print("\nLaunching the k8s cluster... ")
+    print("Cluster is : ")
+    print("Masters")
+    for master in CLUSTER['Masters']:
+        print("    " + str(master['Id_Instance']) + " at " + str(master['Ip_Address']) + " under " + str(master['Dns_Name']))
+    print("Slaves")
+    for slaves in CLUSTER['Slaves']:
+        print("    " + str(slaves['Id_Instance']) + " at " + str(slaves['Ip_Address']) + " under " + str(slaves['Dns_Name']))
+    
     lancer_k8s_ssh(CLUSTER, KEY_NAME)
+    
+    print("Deployed successfully")

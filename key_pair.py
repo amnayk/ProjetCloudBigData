@@ -67,8 +67,8 @@ def create_key_pair(ec2, name=DEFAULT_NAME):
 def delete_keypair(ec2, name=DEFAULT_NAME):
     configured_keys = [key["KeyName"]
                        for key in ec2.describe_key_pairs()["KeyPairs"]]
+    print("Deleting key : " + name)
     if name in configured_keys:
-        print("Deleting key : " + name)
         ec2.delete_key_pair(KeyName=name)
         try:
             os.remove(name + ".pem")

@@ -1,54 +1,99 @@
 from os import remove
 from os.path import isfile
-from private_config import ACCESS_KEY, SECRET_KEY, username, REGION_NAME
+from private_config import ACCESS_KEY, SECRET_KEY, username, REGION_NAME, EC2_KEY_PAIR
 import boto3
 
-from key_pair import delete_keypair_all
+from key_pair import delete_keypair_all, delete_keypair
 from security_group import delete_security_groups
 import time
+import argparse
 
-
-def terminate_instances(ec2):
-
-    ec2_res = boto3.resource(
-        "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION_NAME
+def parse_arguments():
+    parser = argparse.ArgumentParser(
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        description="""Create security group (SG)""",
     )
 
+    parser.add_argument(
+        "-me", "--me", help="Stops the cluster I created", action="store_true"
+    )
+
+    args = parser.parse_args()
+
+    return args
+
+
+def terminate_instances(Filters):
+
     try:
-        response = ec2_res.instances.terminate()[0]["TerminatingInstances"]
-        response = [
-            status
-            for status in response
-            if status["PreviousState"]["Name"] != status["CurrentState"]["Name"]
-        ]
-        for status in response:
-            print(
-                status["InstanceId"]
-                + " : "
-                + status["PreviousState"]["Name"]
-                + " -> "
-                + status["CurrentState"]["Name"]
-            )
-        print("Terminated " + str(len(response)) + " instances.\n")
+        ec2_res = boto3.resource(
+            "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION_NAME
+        )
+
+        response = ec2_res.instances.filter(Filters = Filters).terminate()
+
+        if response:
+            TerminatingInstances = response[0]["TerminatingInstances"]
+
+            print("Found " + str(len(TerminatingInstances)) + " instances.")
+            for instance in TerminatingInstances:
+                print(
+                    "    "
+                    + instance["InstanceId"]
+                    + " : "
+                    + instance["PreviousState"]["Name"]
+                    + " -> "
+                    + instance["CurrentState"]["Name"]
+                )
+            
+            statuses = [
+                status
+                for status in TerminatingInstances
+                if status["PreviousState"]["Name"] != "terminated"
+            ]
+            print("Found " + str(len(statuses)) + " instances to terminate.")
+
+            print("Terminated " + str(len(statuses)) + " instances.\n")
+        else:
+            print("Nothing to terminate")
+
     except Exception as e:
         print(e)
 
 
 if __name__ == "__main__":
 
+    args = parse_arguments()
+
     ec2 = boto3.client(
         "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION_NAME
     )
 
-    delete_keypair_all(ec2)
+    if args.me:
+        print("Stopping using "+EC2_KEY_PAIR)
+        Filters = [
+            {
+                'Name' : 'key-name',
+                'Values': [
+                    EC2_KEY_PAIR
+                ]
+            }
+        ]
+    else:
+        print("Stopping everything")
+        Filters = []
+    
+    # Instances
+    terminate_instances(Filters)
 
-    if ec2.describe_instances()["Reservations"] :
-        terminate_instances(ec2)
-        # Pour permettre de close les instances on ajoute un sleep
-        # IL FAUDRAIT LE REMPLACER PAR ATTENDRE QUE LES INSTANCES LIEES AU GRP SOIT TERMINEES 
-        time.sleep(40)
+    # Keypairs
+    if args.me:
+        delete_keypair(ec2, EC2_KEY_PAIR)
+    else:
+        delete_keypair_all(ec2)
 
-    if len(ec2.describe_security_groups()['SecurityGroups']) > 1 :
+    # Security groups
+    if len(ec2.describe_security_groups()['SecurityGroups']) > 1 and not args.me:
         delete_security_groups(ec2)
     
     # Remove ssh.log

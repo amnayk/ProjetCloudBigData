@@ -3,7 +3,7 @@ def create_instances(ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTER
         ImageId="ami-0d3f551818b21ed81",
         MinCount=1,
         MaxCount=NUMBER_MASTERS,
-        InstanceType="t2.medium",
+        InstanceType="t2.micro",
         KeyName=KEY_NAME,
         NetworkInterfaces=[
             {'AssociatePublicIpAddress': True, 'DeviceIndex': 0}],
@@ -15,7 +15,7 @@ def create_instances(ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTER
         ImageId="ami-0d3f551818b21ed81",
         MinCount=1,
         MaxCount=NUMBER_WORKERS,
-        InstanceType="t2.medium",
+        InstanceType="t2.micro",
         KeyName=KEY_NAME,
         NetworkInterfaces=[
             {'AssociatePublicIpAddress': True, 'DeviceIndex': 0}],
