@@ -46,7 +46,14 @@ scp -i sam_key.pem wc.jar ubuntu@<NOMDNSDUMASTER>:.
 
 Lancer Spark Submit :
 mettre en route le proxy sur le master : kubectl proxy
+
 ouvrir un autre term et :
 spark-submit     --master k8s://https://<AdresseMaster(kubectl cluster-info) OU localhost>:6443     --deploy-mode cluster     --name spark-pi     --class org.apache.spark.examples.SparkPi     --conf spark.executor.instances=1     --conf spark.kubernetes.container.image=vitamingaugau/spark:spark-2.4.4     wc.jar
+
 ouvrir un autre term pour monitorer et voir les logs de notre lancement :
 kubectl get events --sort-by=.metadata.creationTimestamp
+
+On peut aussi voir les logs sur un pods :
+kubectl logs <IdDuPod>
+
+spark-submit     --master k8s://https://<AdresseMaster(kubectl cluster-info) OU localhost>:6443     --deploy-mode cluster     --name WordCount     --class WordCount     --conf spark.executor.instances=2     --conf spark.kubernetes.container.image=vitamingaugau/spark:spark-2.4.4     wc.jar
