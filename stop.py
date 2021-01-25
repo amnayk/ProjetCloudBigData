@@ -90,7 +90,7 @@ if __name__ == "__main__":
 
     # Keypairs
     if args.me:
-        delete_keypair(ec2, EC2_KEY_PAIR)
+        delete_keypair(ec2, username)
     else:
         delete_keypair_all(ec2)
 
