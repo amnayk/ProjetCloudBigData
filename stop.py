@@ -1,6 +1,6 @@
 from os import remove
 from os.path import isfile
-from private_config import ACCESS_KEY, SECRET_KEY, username, REGION_NAME, EC2_KEY_PAIR
+from private_config import ACCESS_KEY, SECRET_KEY, username, REGION_NAME
 import boto3
 
 from key_pair import delete_keypair_all, delete_keypair
@@ -69,13 +69,15 @@ if __name__ == "__main__":
         "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION_NAME
     )
 
+    key_name = username+"_key"
+
     if args.me:
-        print("Stopping using "+EC2_KEY_PAIR)
+        print("Stopping using "+key_name)
         Filters = [
             {
                 'Name' : 'key-name',
                 'Values': [
-                    EC2_KEY_PAIR
+                    key_name
                 ]
             }
         ]
