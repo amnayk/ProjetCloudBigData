@@ -149,6 +149,7 @@ if __name__ == "__main__":
         print("    " + str(slaves['Id_Instance']) + " at " +
               str(slaves['Ip_Address']) + " under " + str(slaves['Dns_Name']))
 
+    time.sleep(40)
     lancer_k8s_ssh(CLUSTER, KEY_NAME)
 
     print("Deployed successfully")
