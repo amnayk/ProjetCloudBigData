@@ -49,8 +49,9 @@ COPY data /opt/spark/data
 COPY wordcount/wc.jar /opt/spark/work-dir/
 COPY wordcount/filesample.txt /opt/spark/work-dir/
 
-RUN rm $SPARK_HOME/jars/kubernetes-client-3.0.0.jar
-ADD https://repo1.maven.org/maven2/io/fabric8/kubernetes-client/4.4.2/kubernetes-client-4.4.2.jar $SPARK_HOME/jars
+RUN rm /opt/spark/jars/kubernetes-client-4.1.2.jar
+ADD https://repo1.maven.org/maven2/io/fabric8/kubernetes-client/4.4.2/kubernetes-client-4.4.2.jar /opt/spark/jars
+ADD https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.7.3/hadoop-aws-2.7.3.jar /opt/spark/jars
 
 ENV SPARK_HOME /opt/spark
 
