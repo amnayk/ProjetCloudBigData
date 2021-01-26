@@ -115,6 +115,6 @@ if __name__ == "__main__":
     if args.create:
         create_key_pair(ec2, args.name)
     elif args.delete:
-        delete_keypair(ec2, args.name)
+        delete_keypair(ec2)
     elif args.list:
         list_keypairs(ec2)
