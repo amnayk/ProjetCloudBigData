@@ -110,10 +110,11 @@ if __name__ == "__main__":
         },
     ]
     print("    Instances are : "+str(ids))
+    print("Waiting for running... (approx. 20sec)")
     while (is_pending(id_filter, ec2)):
         time.sleep(3)
     print("Instances running !")
-    print("Waiting for checks...")
+    print("Waiting for checks... (approx. 150sec)")
     while (is_checking(ids, ec2)):
         time.sleep(10)
     print("Instances checked !")
@@ -156,4 +157,4 @@ if __name__ == "__main__":
 
     lancer_k8s_ssh(CLUSTER, KEY_NAME)
 
-    print("Deployed successfully")
+    print("Deployed successfully !")
