@@ -8,6 +8,7 @@ from security_group import delete_security_groups
 import time
 import argparse
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -30,7 +31,7 @@ def terminate_instances(Filters):
             "ec2", aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name=REGION_NAME
         )
 
-        response = ec2_res.instances.filter(Filters = Filters).terminate()
+        response = ec2_res.instances.filter(Filters=Filters).terminate()
 
         if response:
             TerminatingInstances = response[0]["TerminatingInstances"]
@@ -45,7 +46,7 @@ def terminate_instances(Filters):
                     + " -> "
                     + instance["CurrentState"]["Name"]
                 )
-            
+
             statuses = [
                 status
                 for status in TerminatingInstances
@@ -75,7 +76,7 @@ if __name__ == "__main__":
         print("Stopping using "+key_name)
         Filters = [
             {
-                'Name' : 'key-name',
+                'Name': 'key-name',
                 'Values': [
                     key_name
                 ]
@@ -84,21 +85,21 @@ if __name__ == "__main__":
     else:
         print("Stopping everything")
         Filters = []
-    
+
     # Instances
     terminate_instances(Filters)
 
     # Keypairs
     if args.me:
-        delete_keypair(ec2, EC2_KEY_PAIR)
+        delete_keypair(ec2, username + "_key")
     else:
         delete_keypair_all(ec2)
 
     # Security groups
     if len(ec2.describe_security_groups()['SecurityGroups']) > 1 and not args.me:
         delete_security_groups(ec2)
-    
+
     # Remove ssh.log
-    if isfile("ssh.log") :
+    if isfile("ssh.log"):
         remove("ssh.log")
         print("Deleted file ssh.log")

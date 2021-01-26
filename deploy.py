@@ -112,7 +112,7 @@ if __name__ == "__main__":
           instance.id for instance in slave_instances]))
     while (is_pending(id_filter, ec2)):
         time.sleep(5)
-    time.sleep(5)
+    time.sleep(10)
     print("Instances running !")
 
     # Remplissage du dictionnaire permettant de centraliser les infos sur les slaves et masters
