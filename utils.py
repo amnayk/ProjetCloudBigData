@@ -8,3 +8,13 @@ def is_pending(id_filter, ec2):
             else:
                 print("    "+str(instance['InstanceId'])+" is now "+instance["State"]["Name"]+"!")
     return False
+
+def is_checking(ids, ec2):
+    reservations = ec2.describe_instance_status(InstanceIds = ids)['InstanceStatuses']
+    for status in reservations:
+        if status['InstanceStatus']['Status'] != 'ok' or status['SystemStatus']['Status'] != 'ok':
+            print("    "+str(status['InstanceId'])+" : InstanceStatus or SystemStatus is still initializing ... (not checking others)")
+            return True
+        else:
+            print("    "+str(status['InstanceId'])+" is now " + status["InstanceStatus"]["Status"]+" !")
+    return False

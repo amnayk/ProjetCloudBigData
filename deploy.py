@@ -8,7 +8,7 @@ from key_pair import create_key_pair
 from security_group import create_security_group
 from create_instances import create_instances
 from cluster_k8s_ssh import lancer_k8s_ssh
-from utils import is_pending
+from utils import is_checking, is_pending
 
 DEFAULT_NUMBER_MASTERS = 1
 DEFAULT_NUMBER_WORKERS = 2
@@ -102,17 +102,21 @@ if __name__ == "__main__":
         ec2_resource, security_group, NUMBER_WORKERS, NUMBER_MASTERS, KEY_NAME)
 
     # Il faut le temps que les instances soient créées et dans l'état "running"
+    ids = [instance.id for instance in master_instances] + [instance.id for instance in slave_instances]
     id_filter = [
         {
             'Name': 'instance-id',
-            'Values': [instance.id for instance in master_instances] + [instance.id for instance in slave_instances]
+            'Values': ids
         },
     ]
-    print("    Instances are : "+str([instance.id for instance in master_instances] + [
-          instance.id for instance in slave_instances]))
+    print("    Instances are : "+str(ids))
     while (is_pending(id_filter, ec2)):
-        time.sleep(5)
+        time.sleep(3)
     print("Instances running !")
+    print("Waiting for checks...")
+    while (is_checking(ids, ec2)):
+        time.sleep(10)
+    print("Instances checked !")
     print("Waiting for boot... (10sec)")
     time.sleep(10)
 
