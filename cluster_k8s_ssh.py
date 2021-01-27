@@ -1,12 +1,22 @@
+import time
 import paramiko
+from scp import SCPClient
+from private_config import username
 
+KEY_NAME = username+"_key"
 
-def lancer_k8s_ssh(CLUSTER, KEY_NAME):
+# Config de la connection ssh permettant de se co aux masters et slaves
+def open_ssh():
     k = paramiko.RSAKey.from_private_key_file(KEY_NAME + ".pem")
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     paramiko.util.log_to_file("ssh.log")
+    return [ssh, k]
 
+def lancer_k8s_ssh(CLUSTER):
+    ssh = open_ssh()[0]
+    k = open_ssh()[1]
+    # Lancement des commandes d'initialisation (installation des programmes nécessaires essentiellement) sur toutes les instances (qu'elles soient master ou slave)
     for vm in CLUSTER["Masters"] + CLUSTER["Slaves"]:
         print("Installing "+str(vm['Id_Instance']))
         ssh.connect(hostname=vm["Dns_Name"], username='ubuntu', pkey=k)
@@ -88,7 +98,6 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
             )
 
     cmd_slave = ""
-
     # Lancement de k8s sur les master nodes
     for master in CLUSTER["Masters"]:
         print("Launching Kubernetes on master "+str(master['Id_Instance']))
@@ -121,3 +130,47 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
             pass
 
     return 0
+
+def lancer_spark_on_k8s_ssh(CLUSTER):
+    ssh = open_ssh()[0]
+    k = open_ssh()[1]
+    for master in CLUSTER["Masters"]:
+        ssh.connect(hostname=master["Dns_Name"], username='ubuntu', pkey=k)
+        
+        _, ssh_stdout, _ = ssh.exec_command('sudo apt install openjdk-14-jre-headless -y')
+        for line in iter(ssh_stdout.readline, ""):
+            pass
+        
+        _, ssh_stdout, _ = ssh.exec_command('wget http://sd-127206.dedibox.fr/hagimont/software/spark-2.4.3-bin-hadoop2.7.tgz && tar zxvf spark-2.4.3-bin-hadoop2.7.tgz')
+        for line in iter(ssh_stdout.readline, ""):
+            pass
+        
+        ssh.exec_command("echo '" + 'export JAVA_HOME="/usr/lib/jvm/java-14-openjdk-amd64"\n' +
+'export SPARK_HOME="/home/ubuntu/spark-2.4.3-bin-hadoop2.7"\n' + 
+'export PATH="$PATH:$SPARK_HOME/bin:$SPARK_HOME/sbin"' + "' >> ~/.bashrc && source .bashrc")
+        
+        scp = SCPClient(ssh.get_transport())
+        scp.put('wordcount', recursive=True, remote_path='~/spark-2.4.3-bin-hadoop2.7')
+        scp.put('SparkDockerfile', '~/spark-2.4.3-bin-hadoop2.7/kubernetes/dockerfiles/spark/Dockerfile')
+        scp.close()
+
+        _, ssh_stdout, _ = ssh.exec_command('sudo docker login -u amnayk -p Amnaykdo2408')
+        for line in iter(ssh_stdout.readline, ""):
+            pass
+
+        ssh.exec_command('cd spark-2.4.3-bin-hadoop2.7/ && sudo bin/docker-image-tool.sh -r docker.io/amnayk -t latest41 build')
+        time.sleep(30)
+
+        ssh.exec_command('cd spark-2.4.3-bin-hadoop2.7/ && sudo bin/docker-image-tool.sh -r docker.io/amnayk -t latest41 push')
+        time.sleep(30)
+
+        _, ssh_stdout, _ = ssh.exec_command('kubectl create serviceaccount spark && kubectl create clusterrolebinding spark-role --clusterrole=edit  --serviceaccount=default:spark --namespace=default')
+        for line in iter(ssh_stdout.readline, ""):
+            pass
+
+        ssh.exec_command('kubectl proxy&')
+
+        master_spark = "k8s://https://" + master["Private_Ip_Address"]+":6443"
+        num_executor = len(CLUSTER["Slaves"])
+
+

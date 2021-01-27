@@ -8,3 +8,4 @@ ssh.log
 /kubeconfigs/
 Pipfile
 Pipfile.lock
+ansible/
