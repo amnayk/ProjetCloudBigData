@@ -91,11 +91,7 @@ if __name__ == "__main__":
 
     # Keypairs
     if args.me:
-<<<<<<< HEAD
-        delete_keypair(ec2)
-=======
         delete_keypair(ec2, key_name)
->>>>>>> main
     else:
         delete_keypair_all(ec2)
 
