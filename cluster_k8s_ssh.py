@@ -171,6 +171,8 @@ def lancer_spark_on_k8s_ssh(CLUSTER):
         for line in iter(ssh_stdout.readline, ""):
             pass
 
+        ssh.exec_command('kubectl taint nodes --all node-role.kubernetes.io/master-')
+
         # ssh.exec_command('kubectl proxy&')
         # time.sleep(4)
 
