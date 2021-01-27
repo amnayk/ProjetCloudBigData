@@ -64,8 +64,7 @@ def create_key_pair(ec2, name=DEFAULT_NAME):
     return
 
 
-def delete_keypair(ec2):
-    name=DEFAULT_NAME
+def delete_keypair(ec2, name=DEFAULT_NAME):
     configured_keys = [key["KeyName"]
                        for key in ec2.describe_key_pairs()["KeyPairs"]]
     print("Deleting key : " + name)

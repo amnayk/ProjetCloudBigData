@@ -35,7 +35,7 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
         for line in iter(ssh_stdout.readline, ""):
             pass
 
-        print("""$ echo "net.bridge.bridge-nf-call-ip6tables = 1\nnet.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.d/k8s.conf""")
+        # print("""$ echo "net.bridge.bridge-nf-call-ip6tables = 1\nnet.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.d/k8s.conf""")
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
             'echo "net.bridge.bridge-nf-call-ip6tables = 1\nnet.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.d/k8s.conf'
         )
