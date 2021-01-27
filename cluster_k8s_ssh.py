@@ -12,44 +12,68 @@ def lancer_k8s_ssh(CLUSTER, KEY_NAME):
         ssh.connect(hostname=vm["Dns_Name"], username='ubuntu', pkey=k)
 
         print("    apt-get update...")
+        # print("$ sudo apt-get update -y")
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
             'sudo apt-get update -y')
         for line in iter(ssh_stdout.readline, ""):
             pass
 
-        ssh.exec_command('swapoff -a')
+        # print("$ swapoff -a")
+        ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('swapoff -a')
+        for line in iter(ssh_stdout.readline, ""):
+            pass
 
         print("    fetching Docker...")
+        # print("$ sudo wget -qO- https://get.docker.com/ | sh")
         ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
             'sudo wget -qO- https://get.docker.com/ | sh')
         for line in iter(ssh_stdout.readline, ""):
             pass
 
-        ssh.exec_command('sudo modprobe br_netfilter')
-        ssh.exec_command(
+        # print("$ sudo modprobe br_netfilter")
+        ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command('sudo modprobe br_netfilter')
+        for line in iter(ssh_stdout.readline, ""):
+            pass
+
+        print("""$ echo "net.bridge.bridge-nf-call-ip6tables = 1\nnet.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.d/k8s.conf""")
+        ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
             'echo "net.bridge.bridge-nf-call-ip6tables = 1\nnet.bridge.bridge-nf-call-iptables = 1" | sudo tee -a /etc/sysctl.d/k8s.conf'
         )
+        for line in iter(ssh_stdout.readline, ""):
+            pass
+
+        print("sudo sysctl --system")
         _, ssh_stdout, _ = ssh.exec_command("sudo sysctl --system")
         for line in iter(ssh_stdout.readline, ""):
             pass
 
         print("    fetching Kubernetes...")
-        ssh.exec_command(
+        # print("$ curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -")
+        _, ssh_stdout, _ = ssh.exec_command(
             "curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -"
         )
+        for line in iter(ssh_stdout.readline, ""):
+            pass
+        
+        # print("$ apt-add-repo")
         _, ssh_stdout, _ = ssh.exec_command(
             'sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"'
         )
         for line in iter(ssh_stdout.readline, ""):
             pass
+
+        # print("$ apt-get update")
         _, ssh_stdout, _ = ssh.exec_command("sudo apt-get update")
         for line in iter(ssh_stdout.readline, ""):
             pass
+        
+        # print("$ yes | sudo apt-get install kubelet kubeadm kubectl")
         _, ssh_stdout, _ = ssh.exec_command(
             "yes | sudo apt-get install kubelet kubeadm kubectl"
         )
         for line in iter(ssh_stdout.readline, ""):
             pass
+        
         for master in CLUSTER["Masters"]:
             ssh.exec_command(
                 'echo "' + master["Ip_Address"] + '   master" | sudo tee -a /etc/hosts'
