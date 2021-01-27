@@ -160,8 +160,8 @@ if __name__ == "__main__":
     time.sleep(40)
     lancer_k8s_ssh(CLUSTER)
 
-    lancer_spark_on_k8s_ssh(CLUSTER)
-
     kubeopex.launch(CLUSTER['Masters'][0], KEY_NAME)
+
+    lancer_spark_on_k8s_ssh(CLUSTER)
     
     print("Deployed successfully !")

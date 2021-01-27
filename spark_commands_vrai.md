@@ -141,13 +141,13 @@ wordcount.py s3://inputbucket/input.txt s3://outputbucket/
 
 # ce que Sam utilise de son côté
 spark-submit \
-  --master k8s://https://172.31.24.193:6443/ \
+  --master k8s://https://172.31.16.245:6443/ \
   --deploy-mode cluster \
   --conf spark.app.name=wc \
   --class wordCount.WordCount \
   --conf spark.executor.instances=2 \
   --conf spark.kubernetes.driver.request.cores=1 \
   --conf spark.kubernetes.executor.request.cores=1 \
-  --conf spark.kubernetes.container.image=amnayk/spark:latest41 \
+  --conf spark.kubernetes.container.image=amnayk/spark:lejsorslers \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
   local:///opt/spark/work-dir/wc.jar /opt/spark/work-dir/filesample.txt
