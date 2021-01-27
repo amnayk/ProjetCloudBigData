@@ -158,11 +158,11 @@ def lancer_spark_on_k8s_ssh(CLUSTER):
         for line in iter(ssh_stdout.readline, ""):
             pass
 
-        ssh.exec_command('cd spark-2.4.3-bin-hadoop2.7/ && sudo bin/docker-image-tool.sh -r docker.io/amnayk -t latest41 build')
+        ssh.exec_command('cd spark-2.4.3-bin-hadoop2.7/ && sudo bin/docker-image-tool.sh -r docker.io/amnayk -t derniere build')
         time.sleep(30)
 
-        ssh.exec_command('cd spark-2.4.3-bin-hadoop2.7/ && sudo bin/docker-image-tool.sh -r docker.io/amnayk -t latest41 push')
-        time.sleep(30)
+        ssh.exec_command('cd spark-2.4.3-bin-hadoop2.7/ && sudo bin/docker-image-tool.sh -r docker.io/amnayk -t derniere push')
+        time.sleep(90)
 
         _, ssh_stdout, _ = ssh.exec_command('kubectl create serviceaccount spark && kubectl create clusterrolebinding spark-role --clusterrole=edit  --serviceaccount=default:spark --namespace=default')
         for line in iter(ssh_stdout.readline, ""):

@@ -9,3 +9,4 @@ ssh.log
 Pipfile
 Pipfile.lock
 ansible/
+*.jar
