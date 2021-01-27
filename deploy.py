@@ -157,11 +157,15 @@ if __name__ == "__main__":
         print("    " + str(slaves['Id_Instance']) + " at " +
               str(slaves['Ip_Address']) + " under " + str(slaves['Dns_Name']))
 
+    print("Waiting another 40sec... ")
     time.sleep(40)
+    print("\n\n Launching the kubernetes cluster...")
     lancer_k8s_ssh(CLUSTER)
 
+    print("\n\n Launching spark on the kubernetes cluster...")
     lancer_spark_on_k8s_ssh(CLUSTER)
 
+    print("\n\n Launching kube-opex-analytics on master...")
     kubeopex.launch(CLUSTER['Masters'][0], KEY_NAME)
     
     print("Deployed successfully !")
