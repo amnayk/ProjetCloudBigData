@@ -28,19 +28,19 @@ def launch(vm, KEY_NAME):
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
         'curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3')
     for line in iter(ssh_stdout.readline, ""):
-        print(line)
+        pass
 
     print("    $ chmod 700 get_helm.sh")
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
         'chmod 700 get_helm.sh')
     for line in iter(ssh_stdout.readline, ""):
-        print(line)
+        pass
 
     print("    $ ./get_helm.sh")
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
         './get_helm.sh')
     for line in iter(ssh_stdout.readline, ""):
-        print(line)
+        pass
 
     # Cloning Kube-opex
     print("    ###### Cloning Kube-opex ######")
@@ -48,7 +48,7 @@ def launch(vm, KEY_NAME):
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
         'git clone https://github.com/rchakode/kube-opex-analytics')
     for line in iter(ssh_stdout.readline, ""):
-        print(line)
+        pass
 
     # Kubectl Metrics Server
     print("    ###### Kubectl Metrics Server ######")
@@ -56,7 +56,7 @@ def launch(vm, KEY_NAME):
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
         'kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml')
     for line in iter(ssh_stdout.readline, ""):
-        print(line)
+        pass
 
     # Create PersistentVolume
     print("    ###### Create PersistentVolume ######")
@@ -64,7 +64,7 @@ def launch(vm, KEY_NAME):
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
         'git clone https://github.com/rchakode/kube-opex-analytics')
     for line in iter(ssh_stdout.readline, ""):
-        print(line)
+        pass
 
     print("    $ scp -i "+KEY_NAME+".pem -r pv.yaml ubuntu@" +
           vm["Dns_Name"]+":~/pv.yaml")
@@ -74,7 +74,7 @@ def launch(vm, KEY_NAME):
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
         'kubectl apply -f ~/pv.yaml')
     for line in iter(ssh_stdout.readline, ""):
-        print(line)
+        pass
 
     # Intall KubeOpex
     print("    ###### Intall KubeOpex ######")
@@ -83,7 +83,7 @@ def launch(vm, KEY_NAME):
     ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
         'helm install deploy1 kube-opex-analytics/helm/kube-opex-analytics/')
     for line in iter(ssh_stdout.readline, ""):
-        print(line)
+        pass
 
     time.sleep(10)
 
@@ -91,4 +91,4 @@ def launch(vm, KEY_NAME):
     # ssh_stdin, ssh_stdout, ssh_stderr = ssh.exec_command(
     #     'kubectl port-forward service/deploy1-kube-opex-analytics 8080:80 --address 0.0.0.0')
     # for line in iter(ssh_stdout.readline, ""):
-    #     print(line)
+    #     pass
