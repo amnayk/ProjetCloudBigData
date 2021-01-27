@@ -9,6 +9,7 @@ from security_group import create_security_group
 from create_instances import create_instances
 from cluster_k8s_ssh import lancer_k8s_ssh
 from utils import is_checking, is_pending
+import kubeopex
 
 DEFAULT_NUMBER_MASTERS = 1
 DEFAULT_NUMBER_WORKERS = 2
@@ -157,4 +158,6 @@ if __name__ == "__main__":
 
     lancer_k8s_ssh(CLUSTER, KEY_NAME)
 
+    kubeopex.launch(CLUSTER['Masters'][0], KEY_NAME)
+    
     print("Deployed successfully !")
