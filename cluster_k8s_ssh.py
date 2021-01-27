@@ -179,7 +179,7 @@ def lancer_spark_on_k8s_ssh(CLUSTER):
   --deploy-mode cluster \
   --conf spark.app.name=wc \
   --class wordCount.WordCount \
-  --conf spark.executor.instances='+ num_executor + ' \
+  --conf spark.executor.instances='+ str(num_executor) + ' \
   --conf spark.kubernetes.driver.request.cores=1 \
   --conf spark.kubernetes.executor.request.cores=1 \
   --conf spark.kubernetes.container.image=amnayk/spark:derniere \
