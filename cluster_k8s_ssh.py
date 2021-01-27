@@ -169,8 +169,19 @@ def lancer_spark_on_k8s_ssh(CLUSTER):
             pass
 
         ssh.exec_command('kubectl proxy&')
+        time.sleep(4)
 
         master_spark = "k8s://https://" + master["Private_Ip_Address"]+":6443"
         num_executor = len(CLUSTER["Slaves"])
 
-
+        ssh.exec_command('spark-submit \
+  --master ' + master_spark + ' \
+  --deploy-mode cluster \
+  --conf spark.app.name=wc \
+  --class wordCount.WordCount \
+  --conf spark.executor.instances='+ num_executor + ' \
+  --conf spark.kubernetes.driver.request.cores=1 \
+  --conf spark.kubernetes.executor.request.cores=1 \
+  --conf spark.kubernetes.container.image=amnayk/spark:derniere \
+  --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
+  local:///opt/spark/work-dir/wc.jar')
