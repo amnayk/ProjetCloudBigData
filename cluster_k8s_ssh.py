@@ -158,23 +158,26 @@ def lancer_spark_on_k8s_ssh(CLUSTER):
         for line in iter(ssh_stdout.readline, ""):
             pass
 
-        ssh.exec_command('cd spark-2.4.3-bin-hadoop2.7/ && sudo bin/docker-image-tool.sh -r docker.io/amnayk -t derniere build')
+        _, _, ssh_stderr = ssh.exec_command('cd spark-2.4.3-bin-hadoop2.7/ && sudo bin/docker-image-tool.sh -r docker.io/amnayk -t thelastone build')
+        for line in iter(ssh_stderr.readline, ""):
+            print(line)
+
+        _, _, ssh_stderr = ssh.exec_command('cd spark-2.4.3-bin-hadoop2.7/ && sudo bin/docker-image-tool.sh -r docker.io/amnayk -t thelastone push')
+        for line in iter(ssh_stderr.readline, ""):
+            print(line)
         time.sleep(30)
 
-        ssh.exec_command('cd spark-2.4.3-bin-hadoop2.7/ && sudo bin/docker-image-tool.sh -r docker.io/amnayk -t derniere push')
-        time.sleep(90)
-
-        _, ssh_stdout, _ = ssh.exec_command('kubectl create serviceaccount spark && kubectl create clusterrolebinding spark-role --clusterrole=edit  --serviceaccount=default:spark --namespace=default')
+        _, ssh_stdout, _ = ssh.exec_command('cd && kubectl create serviceaccount spark && kubectl create clusterrolebinding spark-role --clusterrole=edit  --serviceaccount=default:spark --namespace=default')
         for line in iter(ssh_stdout.readline, ""):
             pass
 
-        ssh.exec_command('kubectl proxy&')
-        time.sleep(4)
+        # ssh.exec_command('kubectl proxy&')
+        # time.sleep(4)
 
         master_spark = "k8s://https://" + master["Private_Ip_Address"]+":6443"
         num_executor = len(CLUSTER["Slaves"])
 
-        ssh.exec_command('spark-submit \
+        _, _, ssh_stderr = ssh.exec_command('./spark-2.4.3-bin-hadoop2.7/bin/spark-submit \
   --master ' + master_spark + ' \
   --deploy-mode cluster \
   --conf spark.app.name=wc \
@@ -182,6 +185,8 @@ def lancer_spark_on_k8s_ssh(CLUSTER):
   --conf spark.executor.instances='+ str(num_executor) + ' \
   --conf spark.kubernetes.driver.request.cores=1 \
   --conf spark.kubernetes.executor.request.cores=1 \
-  --conf spark.kubernetes.container.image=amnayk/spark:derniere \
+  --conf spark.kubernetes.container.image=amnayk/spark:thelastone \
   --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
   local:///opt/spark/work-dir/wc.jar')
+        for line in iter(ssh_stderr.readline, ""):
+            pass
