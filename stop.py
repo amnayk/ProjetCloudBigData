@@ -97,6 +97,7 @@ if __name__ == "__main__":
 
     # Security groups
     if len(ec2.describe_security_groups()['SecurityGroups']) > 1 and not args.me:
+        time.sleep(10)
         delete_security_groups(ec2)
 
     # Remove ssh.log

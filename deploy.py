@@ -7,7 +7,7 @@ from botocore.exceptions import ClientError
 from key_pair import create_key_pair
 from security_group import create_security_group
 from create_instances import create_instances
-from cluster_k8s_ssh import lancer_k8s_ssh
+from cluster_k8s_ssh import lancer_k8s_ssh, lancer_spark_on_k8s_ssh
 from utils import is_checking, is_pending
 import kubeopex
 
@@ -128,7 +128,8 @@ if __name__ == "__main__":
             {
                 "Id_Instance": instance.id,
                 "Ip_Address": ec2_resource.Instance(instance.id).public_ip_address,
-                "Dns_Name": ec2_resource.Instance(instance.id).public_dns_name
+                "Dns_Name": ec2_resource.Instance(instance.id).public_dns_name,
+                "Private_Ip_Address": ec2_resource.Instance(instance.id).private_ip_address
             }
         )
 
@@ -156,7 +157,10 @@ if __name__ == "__main__":
         print("    " + str(slaves['Id_Instance']) + " at " +
               str(slaves['Ip_Address']) + " under " + str(slaves['Dns_Name']))
 
-    lancer_k8s_ssh(CLUSTER, KEY_NAME)
+    time.sleep(40)
+    lancer_k8s_ssh(CLUSTER)
+
+    lancer_spark_on_k8s_ssh(CLUSTER)
 
     kubeopex.launch(CLUSTER['Masters'][0], KEY_NAME)
     
