@@ -28,11 +28,11 @@ Ce projet consiste à : automatiser le déploiement de Kubernetes sur un cluster
   ```
 ### Lancement
 
-Pour lancer votre cluster, il vous suffit d'une commande :
+- Pour lancer votre cluster, il vous suffit d'une commande :
   ```
   python3 deploy.py -u <Nom d'utilisateur choisi avant> -m <Nombre de master(s)> -w <Nombre de worker(s)>
   ```
-Le lancement finit sur un wait() bloquant, cependant, cela ne gêne pas le lancement de notre cluster, le lancement des pods spark dans kubernetes et la bonne exécution de notre application wordcount à l'intérieur de ceux-ci.
+- Le lancement finit sur un wait() bloquant, cependant, cela ne gêne pas le lancement de notre cluster, le lancement des pods spark dans kubernetes et la bonne exécution de notre application wordcount à l'intérieur de ceux-ci.
 
 ### Problèmes liés à l'utilisation de Kube-opex
 
