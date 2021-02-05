@@ -35,11 +35,11 @@ Ce projet consiste à : automatiser le déploiement de Kubernetes sur un cluster
 
 ### Problèmes liés à l'utilisation de Kube-opex
 
-L'interface Kube-Opex n'est pas disponible naturellement suite au déploiement à acause des problèmes suivants :
-- Kube-Ope est installé sur le cluster Kubernetes en tant que service, et n'est donc pas disponible nativement sur le réseau externe. Deux solutions sont alors disponibles pour résoudre ce problème :
+L'interface Kube-Opex n'est pas disponible naturellement à la suite du déploiement à cause des problèmes suivants :
+- Kube-Opex est installé sur le cluster Kubernetes en tant que service, et n'est donc pas disponible nativement sur le réseau externe. Deux solutions sont alors disponibles pour résoudre ce problème :
 1. Générer un autre service de type load-balancer avec une configuration de redirection de port
 2. Faire la redirection directement grâce à l'utilitaire ```port-forwarding``` de Kubernetes.
-Pour un soucis de temps, nous avons sélectionné la seonde option. Le soucis, est que la commande ```kubectl port-forwarding``` est une commande bloquante utilisée normalement à des fins de tests. Elle n'est donc ni robuste ni stable, et n'est d'ailleurs pas compatible avec notre biliothèque de configuration des machines en ssh. (```paramiko```)
+Pour un soucis de temps, nous avons sélectionné la seconde option. Le souci est que la commande ```kubectl port-forwarding``` est une commande bloquante utilisée normalement à des fins de test. Elle n'est donc ni robuste ni stable, et n'est d'ailleurs pas compatible avec notre biliothèque de configuration des machines en ssh. (```paramiko```)
 
 Pour démarrer malgré tout l'interface, il faut :
 - se connecter au master-node de notre cluster en ssh avec la clé générée
