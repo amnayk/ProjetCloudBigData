@@ -34,8 +34,13 @@ Pour lancer votre cluster, il vous suffit d'une commande :
   ```
 Le lancement finit sur un wait() bloquant, cependant, cela ne gêne pas le lancement de notre cluster, le lancement des pods spark dans kubernetes et la bonne exécution de notre application wordcount à l'intérieur de ceux-ci.
 
-### Problème lié à l'utilisation de Kube-opex
-TODOBEM
+### Problèmes liés à l'utilisation de Kube-opex
+
+- Concernant l'application de monitoring Kube-opex, nous n'avons pas réussi à incorporer dans notre fichier python d'automatisation le lancement de la commande de port-forwarding en ssh car c'est une commande bloquante. Il vous suffit donc de vous connecter en ssh au master en utilisant son adresse DNS publique et ensuite de taper dans son terminal :
+  ```
+  TODOBEM
+  ```
+- Cependant, un deuxième problème survient, nous n'avons pas accès aux métriques d'utilisation mémoire et CPU de notre application s'éxecutant sous kubernetes.
 
 ### Arrêt du cluster
 
